@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'constants/dummy_data.dart';
 import 'providers/nav_provider.dart';
 import 'screens/home/home_screen.dart';
+import 'screens/home/widgets/event_fab.dart';
 import 'screens/pets/pets_screen.dart';
 import 'screens/calendar/calendar_screen.dart';
 import 'screens/settings/settings_screen.dart';
@@ -121,12 +122,7 @@ class MainScaffold extends ConsumerWidget {
         index: selectedIndex,
         children: _screens,
       ),
-      floatingActionButton: selectedIndex == 0
-          ? FloatingActionButton(
-              onPressed: () {},
-              child: const Icon(Icons.add),
-            )
-          : null,
+      floatingActionButton: selectedIndex == 0 ? const EventFab() : null,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: selectedIndex,
         onTap: (i) => ref.read(navIndexProvider.notifier).state = i,
