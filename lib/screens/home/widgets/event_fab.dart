@@ -22,17 +22,14 @@ class _EventFabState extends ConsumerState<EventFab> {
   final _selectedPetIds = <int>[];
   List<Pet>? _pets;
   bool _saving = false;
-  StateSetter? _setSheetState;
 
   Future<void> _openSheet() async {
     _step = 1;
     _selectedKeys.clear();
     _selectedPetIds.clear();
-    _pets = null;
+    _pets = ref.read(petListProvider);
     _saving = false;
-    _setSheetState = null;
     setState(() => _sheetOpen = true);
-    _loadPets();
     if (!mounted) return;
     await showModalBottomSheet<void>(
       context: context,
@@ -43,19 +40,10 @@ class _EventFabState extends ConsumerState<EventFab> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, ss) {
-          _setSheetState = ss;
-          return _buildSheet(ctx, ss);
-        },
+        builder: (ctx, ss) => _buildSheet(ctx, ss),
       ),
     );
     if (mounted) setState(() => _sheetOpen = false);
-  }
-
-  Future<void> _loadPets() async {
-    final pets = await ref.read(petServiceProvider).allPets();
-    if (!mounted) return;
-    (_setSheetState ?? setState)(() => _pets = pets);
   }
 
   Future<void> _handleDone(BuildContext ctx, StateSetter ss) async {

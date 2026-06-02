@@ -60,7 +60,7 @@ class CustomBlueprint {
 ```
 
 ### Event
-One record per pet per logging action. If a user logs poop+pee for Sarge and Winnie, two Event records are written.
+One record per pet per logging action. If a user logs poop+pee for Sheba and Winnie, two Event records are written.
 
 ```dart
 @Entity()

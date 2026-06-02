@@ -119,6 +119,17 @@ class AppDatabase extends _$AppDatabase {
   Future<int> insertPet(PetsCompanion companion) =>
       into(pets).insert(companion);
 
+  Future<void> updatePetById(Pet pet) async {
+    await (update(pets)..where((t) => t.id.equals(pet.id)))
+        .write(pet.toCompanion(false));
+  }
+
+  Future<int> deleteEventsForPet(int petId) =>
+      (delete(events)..where((t) => t.petId.equals(petId))).go();
+
+  Future<int> deletePetById(int petId) =>
+      (delete(pets)..where((t) => t.id.equals(petId))).go();
+
   Future<int> insertEvent(EventsCompanion companion) =>
       into(events).insert(companion);
 }

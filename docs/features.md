@@ -6,7 +6,7 @@ Reverse-chronological timeline of events for all pets the user is associated wit
 
 - Grouped by date: "Today", "Yesterday", then specific dates (e.g. "Tuesday, May 15")
 - One card per pet per logging action
-- Cards are NOT merged across pets (Sarge and Winnie get separate cards even if logged together)
+- Cards are NOT merged across pets (Sheba and Winnie get separate cards even if logged together)
 - Bottom nav bar: Home | My Pets | Calendar | Settings
 
 ### Event Card Layout
@@ -14,7 +14,7 @@ Reverse-chronological timeline of events for all pets the user is associated wit
 [ Pet photo ]  {Pet name} {displayLabel}
                {time} · by {loggedByName}
 ```
-Example: "Sarge pooped and peed — 4:32 PM · by Emily"
+Example: "Sheba pooped and peed — 4:32 PM · by Sarah"
 
 ---
 

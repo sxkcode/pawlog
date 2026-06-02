@@ -4,6 +4,7 @@ import 'constants/dummy_data.dart';
 import 'providers/nav_provider.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/home/widgets/event_fab.dart';
+import 'screens/pets/pet_detail_screen.dart';
 import 'screens/pets/pets_screen.dart';
 import 'screens/calendar/calendar_screen.dart';
 import 'screens/settings/settings_screen.dart';
@@ -97,27 +98,43 @@ class MainScaffold extends ConsumerWidget {
     final selectedIndex = ref.watch(navIndexProvider);
 
     return Scaffold(
-      appBar: selectedIndex == 0
-          ? AppBar(
-              title: const Text('Pawlog'),
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 16),
-                  child: CircleAvatar(
-                    backgroundColor: _sand,
-                    child: const Text(
-                      'SK',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
+      appBar: switch (selectedIndex) {
+        0 => AppBar(
+            title: const Text('Pawlog'),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: CircleAvatar(
+                  backgroundColor: _sand,
+                  child: const Text(
+                    'SK',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
                     ),
                   ),
                 ),
-              ],
-            )
-          : null,
+              ),
+            ],
+          ),
+        1 => AppBar(
+            title: const Text('My Pets'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.add),
+                tooltip: 'Add pet',
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (_) => const PetDetailScreen()),
+                ),
+              ),
+            ],
+          ),
+        2 => AppBar(title: const Text('Calendar')),
+        3 => AppBar(title: const Text('Settings')),
+        _ => null,
+      },
       body: IndexedStack(
         index: selectedIndex,
         children: _screens,

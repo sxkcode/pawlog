@@ -82,3 +82,11 @@ See @docs/features.md for full feature specs and UX flows.
 ## Dependencies
 - A new sqlite3.wasm must be downloaded if sqlite3 is updated in pubspec.yaml and the .wasm must match the version in the pubspec.lock
 - A new drift_worker.js must be downloaded if drift is updated in pubspec.yaml and the .js must match the version in the pubspec.lock
+
+## Deferred: Role display on Pets screen
+Each pet list item should eventually show the user's role 
+(Parent / Relative / Sitter) as a small chip. Deferred until 
+Firebase Auth and the membership/invite system is implemented. 
+When added, edit and delete controls on PetDetailScreen should 
+be conditionally shown based on role — Parents only for delete, 
+Parents and Relatives for edit.
