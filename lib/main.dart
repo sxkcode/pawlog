@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'constants/dummy_data.dart';
 import 'providers/nav_provider.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/pets/pets_screen.dart';
 import 'screens/calendar/calendar_screen.dart';
 import 'screens/settings/settings_screen.dart';
+import 'services/database_service.dart';
 
 const _teal = Color(0xFF0F7173);
 const _background = Color(0xFFE7ECEF);
@@ -14,8 +16,23 @@ const _coral = Color(0xFFF05D5E);
 const _sand = Color(0xFFD8A47F);
 const _ink = Color(0xFF272932);
 
-void main() {
-  runApp(const ProviderScope(child: PawlogApp()));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final dbService = DatabaseService.create();
+
+  // Seed with demo data on first launch (empty DB).
+  final existingPets = await dbService.db.getPetsForUser();
+  if (existingPets.isEmpty) {
+    await seedDatabase(dbService);
+  }
+
+  runApp(
+    ProviderScope(
+      overrides: [databaseServiceProvider.overrideWithValue(dbService)],
+      child: const PawlogApp(),
+    ),
+  );
 }
 
 class PawlogApp extends StatelessWidget {

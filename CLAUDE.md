@@ -78,3 +78,7 @@ for code generation).
 ## Reference Docs
 See @docs/data-model.md for full entity definitions and relationships.
 See @docs/features.md for full feature specs and UX flows.
+
+## Dependencies
+- A new sqlite3.wasm must be downloaded if sqlite3 is updated in pubspec.yaml and the .wasm must match the version in the pubspec.lock
+- A new drift_worker.js must be downloaded if drift is updated in pubspec.yaml and the .js must match the version in the pubspec.lock

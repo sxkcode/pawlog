@@ -1,4 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../constants/dummy_data.dart';
+import '../database/database.dart';
+import '../services/event_service.dart';
+import '../services/database_service.dart';
 
-final eventListProvider = Provider<List<DummyEvent>>((ref) => dummyEvents);
+final eventServiceProvider = ChangeNotifierProvider<EventService>(
+  (ref) => EventService(ref.watch(databaseServiceProvider)),
+);
+
+final eventListProvider = Provider<List<EventWithPet>>(
+  (ref) => ref.watch(eventServiceProvider).events,
+);

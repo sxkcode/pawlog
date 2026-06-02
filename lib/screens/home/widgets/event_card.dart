@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import '../../../constants/dummy_data.dart';
+import '../../../database/database.dart';
 
 const _sand = Color(0xFFD8A47F);
 const _ink = Color(0xFF272932);
 
 class EventCard extends StatelessWidget {
-  final DummyEvent event;
+  final EventWithPet event;
 
   const EventCard({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
+    final petName = event.petName;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Container(
@@ -27,7 +29,7 @@ class EventCard extends StatelessWidget {
               radius: 22,
               backgroundColor: _sand,
               child: Text(
-                event.petName[0].toUpperCase(),
+                petName.isNotEmpty ? petName[0].toUpperCase() : '?',
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -41,7 +43,7 @@ class EventCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${event.petName} ${event.displayLabel}',
+                    '$petName ${event.displayLabel}',
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
