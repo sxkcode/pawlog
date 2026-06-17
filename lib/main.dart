@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'constants/dummy_data.dart';
 import 'providers/nav_provider.dart';
 import 'providers/profile_provider.dart';
+import 'providers/theme_provider.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/home/widgets/event_fab.dart';
 import 'screens/pets/pet_detail_screen.dart';
@@ -12,6 +13,7 @@ import 'screens/profile/profile_screen.dart';
 import 'screens/settings/settings_screen.dart';
 import 'services/database_service.dart';
 import 'services/profile_service.dart';
+import 'services/theme_service.dart';
 
 const _teal = Color(0xFF0F7173);
 const _background = Color(0xFFE7ECEF);
@@ -26,6 +28,7 @@ void main() async {
 
   final dbService = DatabaseService.create();
   final profileService = await ProfileService.create();
+  final themeService = await ThemeService.create();
 
   // Seed with demo data on first launch (empty DB).
   final existingPets = await dbService.db.getPetsForUser();
@@ -38,20 +41,24 @@ void main() async {
       overrides: [
         databaseServiceProvider.overrideWithValue(dbService),
         profileServiceProvider.overrideWith((ref) => profileService),
+        themeServiceProvider.overrideWith((ref) => themeService),
       ],
       child: const PawlogApp(),
     ),
   );
 }
 
-class PawlogApp extends StatelessWidget {
+class PawlogApp extends ConsumerWidget {
   const PawlogApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeServiceProvider).mode;
     return MaterialApp(
       title: 'Pawlog',
       debugShowCheckedModeBanner: false,
+      themeMode: themeMode,
+      darkTheme: ThemeData.dark(),
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: _teal).copyWith(

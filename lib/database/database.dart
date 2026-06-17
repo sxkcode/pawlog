@@ -132,4 +132,10 @@ class AppDatabase extends _$AppDatabase {
 
   Future<int> insertEvent(EventsCompanion companion) =>
       into(events).insert(companion);
+
+  Future<void> clearAllData() async {
+    await delete(events).go();
+    await delete(customBlueprints).go();
+    await delete(pets).go();
+  }
 }

@@ -43,4 +43,11 @@ class PetService extends ChangeNotifier {
     await _svc.db.deletePetById(petId);
     await _load();
   }
+
+  Future<void> clearAll() async {
+    await _svc.db.clearAllData();
+    await _load();
+  }
+
+  Future<void> refresh() => _load();
 }
