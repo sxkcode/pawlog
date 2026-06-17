@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../constants/app_colors.dart';
 import '../../providers/profile_provider.dart';
-
-const _coral = Color(0xFFF05D5E);
-const _sand = Color(0xFFD8A47F);
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -50,7 +48,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               children: [
                 CircleAvatar(
                   radius: 40,
-                  backgroundColor: _sand,
+                  backgroundColor: AppColors.sand,
                   child: Text(
                     initial,
                     style: const TextStyle(
@@ -90,7 +88,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ElevatedButton(
             onPressed: _saving ? null : _save,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _coral,
+              backgroundColor: AppColors.accent,
               foregroundColor: Colors.white,
               minimumSize: const Size.fromHeight(48),
             ),

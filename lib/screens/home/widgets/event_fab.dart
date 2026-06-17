@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../constants/app_colors.dart';
 import '../../../constants/system_blueprints.dart';
 import '../../../database/database.dart';
 import '../../../providers/event_provider.dart';
 import '../../../providers/pet_provider.dart';
 import '../../../providers/profile_provider.dart';
 
-const _coral = Color(0xFFF05D5E);
-const _sand = Color(0xFFD8A47F);
 
 class EventFab extends ConsumerStatefulWidget {
   const EventFab({super.key});
@@ -25,7 +24,7 @@ class _EventFabState extends ConsumerState<EventFab> {
   bool _saving = false;
 
   ButtonStyle get _actionStyle => ElevatedButton.styleFrom(
-        backgroundColor: _coral, foregroundColor: Colors.white,
+        backgroundColor: AppColors.accent, foregroundColor: Colors.white,
         disabledBackgroundColor: Colors.grey.shade300, disabledForegroundColor: Colors.grey.shade500,
       );
 
@@ -56,12 +55,16 @@ class _EventFabState extends ConsumerState<EventFab> {
 
   Future<void> _handleDone(BuildContext ctx, StateSetter ss) async {
     ss(() => _saving = true);
-    await ref.read(eventServiceProvider).logEvents(
-      systemComponentKeys: List.of(_selectedKeys),
-      petIds: List.of(_selectedPetIds),
-      loggedByName: ref.read(profileServiceProvider).displayName,
-    );
-    if (ctx.mounted) Navigator.of(ctx).pop();
+    try {
+      await ref.read(eventServiceProvider).logEvents(
+        systemComponentKeys: List.of(_selectedKeys),
+        petIds: List.of(_selectedPetIds),
+        loggedByName: ref.read(profileServiceProvider).displayName,
+      );
+      if (ctx.mounted) Navigator.of(ctx).pop();
+    } catch (_) {
+      if (ctx.mounted) ss(() => _saving = false);
+    }
   }
 
   Widget _header(String title, BuildContext ctx) => Row(
@@ -83,7 +86,7 @@ class _EventFabState extends ConsumerState<EventFab> {
             title: Text(_labelFor(b)),
             value: _selectedKeys.contains(b.name),
             onChanged: (v) => ss(() => v == true ? _selectedKeys.add(b.name) : _selectedKeys.remove(b.name)),
-            activeColor: _coral,
+            activeColor: AppColors.accent,
             controlAffinity: ListTileControlAffinity.leading,
             contentPadding: EdgeInsets.zero,
           ),
@@ -120,7 +123,7 @@ class _EventFabState extends ConsumerState<EventFab> {
             CheckboxListTile(
               title: Text(p.name),
               secondary: CircleAvatar(
-                backgroundColor: _sand,
+                backgroundColor: AppColors.sand,
                 child: Text(p.name[0].toUpperCase(),
                     style: const TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold)),
@@ -135,7 +138,7 @@ class _EventFabState extends ConsumerState<EventFab> {
                           _selectedPetIds.remove(p.id);
                         }
                       }),
-              activeColor: _coral,
+              activeColor: AppColors.accent,
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: EdgeInsets.zero,
             ),
@@ -184,7 +187,7 @@ class _EventFabState extends ConsumerState<EventFab> {
   Widget build(BuildContext context) {
     return FloatingActionButton(
       onPressed: _sheetOpen ? () => Navigator.of(context).pop() : _openSheet,
-      backgroundColor: _coral,
+      backgroundColor: AppColors.accent,
       foregroundColor: Colors.white,
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),

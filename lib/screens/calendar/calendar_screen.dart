@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../../constants/app_colors.dart';
 import '../../constants/blueprint_colors.dart';
 import '../../database/database.dart';
 import '../../providers/calendar_provider.dart';
 import '../../providers/event_provider.dart';
 import 'day_timeline_screen.dart';
-
-const _teal = Color(0xFF0F7173);
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -69,21 +68,29 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         formatButtonVisible: false,
         titleCentered: true,
         titleTextStyle: TextStyle(
-            color: _teal, fontSize: 17, fontWeight: FontWeight.w600),
-        leftChevronIcon: Icon(Icons.chevron_left, color: _teal),
-        rightChevronIcon: Icon(Icons.chevron_right, color: _teal),
+            color: AppColors.primary, fontSize: 17, fontWeight: FontWeight.w600),
+        leftChevronIcon: Icon(Icons.chevron_left, color: AppColors.primary),
+        rightChevronIcon: Icon(Icons.chevron_right, color: AppColors.primary),
       ),
       calendarStyle: CalendarStyle(
         selectedDecoration:
-            const BoxDecoration(color: _teal, shape: BoxShape.circle),
+            const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
         todayDecoration: BoxDecoration(
-          color: _teal.withValues(alpha: 0.25),
+          color: AppColors.primary.withValues(alpha: 0.25),
           shape: BoxShape.circle,
         ),
       ),
       calendarBuilders: CalendarBuilders(
         markerBuilder: (ctx, day, keys) {
           if (keys.isEmpty) return null;
+          // `keys` here are the deduplicated activity key strings produced by
+          // calendarEventMapProvider (e.g. ["poop", "walk"]) — at most one
+          // entry per activity type per day regardless of how many events were
+          // logged. take(4) caps the dot count so a day with many activity
+          // types doesn't overflow the cell width.
+          //
+          // bottom: 2 shifts the row below table_calendar's day-number circle;
+          // without it the dots overlap the number.
           return Padding(
             padding: const EdgeInsets.only(bottom: 2),
             child: Row(

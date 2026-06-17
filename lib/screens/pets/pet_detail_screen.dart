@@ -1,12 +1,10 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../constants/app_colors.dart';
 import '../../database/database.dart';
 import '../../providers/event_provider.dart';
 import '../../providers/pet_provider.dart';
-
-const _coral = Color(0xFFF05D5E);
-const _sand = Color(0xFFD8A47F);
 
 class PetDetailScreen extends ConsumerStatefulWidget {
   final Pet? pet;
@@ -49,24 +47,28 @@ class _PetDetailScreenState extends ConsumerState<PetDetailScreen> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
-    final petSvc = ref.read(petServiceProvider);
-    if (_isEdit) {
-      final updated = widget.pet!.copyWith(
-        name: _name.text.trim(),
-        species: Value(_species.text.trim().isEmpty ? null : _species.text.trim()),
-        breed: Value(_breed.text.trim().isEmpty ? null : _breed.text.trim()),
-        birthdate: Value(_birthdate?.millisecondsSinceEpoch),
-      );
-      await petSvc.updatePet(updated);
-    } else {
-      await petSvc.addPet(
-        name: _name.text.trim(),
-        species: _species.text.trim().isEmpty ? null : _species.text.trim(),
-        breed: _breed.text.trim().isEmpty ? null : _breed.text.trim(),
-        birthdate: _birthdate,
-      );
+    try {
+      final petSvc = ref.read(petServiceProvider);
+      if (_isEdit) {
+        final updated = widget.pet!.copyWith(
+          name: _name.text.trim(),
+          species: Value(_species.text.trim().isEmpty ? null : _species.text.trim()),
+          breed: Value(_breed.text.trim().isEmpty ? null : _breed.text.trim()),
+          birthdate: Value(_birthdate?.millisecondsSinceEpoch),
+        );
+        await petSvc.updatePet(updated);
+      } else {
+        await petSvc.addPet(
+          name: _name.text.trim(),
+          species: _species.text.trim().isEmpty ? null : _species.text.trim(),
+          breed: _breed.text.trim().isEmpty ? null : _breed.text.trim(),
+          birthdate: _birthdate,
+        );
+      }
+      if (mounted) Navigator.of(context).pop();
+    } catch (_) {
+      if (mounted) setState(() => _saving = false);
     }
-    if (mounted) Navigator.of(context).pop();
   }
 
   Future<void> _confirmDelete() async {
@@ -85,7 +87,7 @@ class _PetDetailScreenState extends ConsumerState<PetDetailScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            style: TextButton.styleFrom(foregroundColor: _coral),
+            style: TextButton.styleFrom(foregroundColor: AppColors.accent),
             child: const Text('Delete'),
           ),
         ],
@@ -93,9 +95,13 @@ class _PetDetailScreenState extends ConsumerState<PetDetailScreen> {
     );
     if (confirmed != true || !mounted) return;
     setState(() => _saving = true);
-    await ref.read(petServiceProvider).deletePet(widget.pet!.id);
-    await ref.read(eventServiceProvider).refresh();
-    if (mounted) Navigator.of(context).pop();
+    try {
+      await ref.read(petServiceProvider).deletePet(widget.pet!.id);
+      await ref.read(eventServiceProvider).refresh();
+      if (mounted) Navigator.of(context).pop();
+    } catch (_) {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   Future<void> _pickDate() async {
@@ -106,7 +112,7 @@ class _PetDetailScreenState extends ConsumerState<PetDetailScreen> {
       firstDate: DateTime(2000),
       lastDate: now,
     );
-    if (picked != null) setState(() => _birthdate = picked);
+    if (picked != null && mounted) setState(() => _birthdate = picked);
   }
 
   @override
@@ -136,7 +142,7 @@ class _PetDetailScreenState extends ConsumerState<PetDetailScreen> {
                 children: [
                   CircleAvatar(
                     radius: 40,
-                    backgroundColor: _sand,
+                    backgroundColor: AppColors.sand,
                     child: Text(nameInitial,
                         style: const TextStyle(
                             color: Colors.white,
@@ -203,7 +209,7 @@ class _PetDetailScreenState extends ConsumerState<PetDetailScreen> {
               onPressed:
                   (_name.text.trim().isEmpty || _saving) ? null : _save,
               style: ElevatedButton.styleFrom(
-                backgroundColor: _coral,
+                backgroundColor: AppColors.accent,
                 foregroundColor: Colors.white,
                 disabledBackgroundColor: Colors.grey.shade300,
                 disabledForegroundColor: Colors.grey.shade500,

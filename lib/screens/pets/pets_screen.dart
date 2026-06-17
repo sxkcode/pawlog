@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../constants/app_colors.dart';
 import '../../providers/pet_provider.dart';
 import 'pet_detail_screen.dart';
-
-const _sand = Color(0xFFD8A47F);
-const _ink = Color(0xFF272932);
 
 class PetsScreen extends ConsumerWidget {
   const PetsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (ref.watch(petLoadingProvider)) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     final pets = ref.watch(petListProvider);
 
     if (pets.isEmpty) {
@@ -39,7 +41,7 @@ class PetsScreen extends ConsumerWidget {
         }
         return ListTile(
           leading: CircleAvatar(
-            backgroundColor: _sand,
+            backgroundColor: AppColors.sand,
             child: Text(
               p.name[0].toUpperCase(),
               style: const TextStyle(
@@ -48,7 +50,7 @@ class PetsScreen extends ConsumerWidget {
           ),
           title: Text(p.name,
               style: const TextStyle(
-                  fontWeight: FontWeight.w600, color: _ink)),
+                  fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
           subtitle: subtitle != null ? Text(subtitle) : null,
           trailing: const Icon(Icons.chevron_right, color: Colors.grey),
           onTap: () => Navigator.of(ctx).push(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../constants/app_colors.dart';
 import '../../database/database.dart';
 import '../../providers/event_provider.dart';
 import 'widgets/date_section_header.dart';
@@ -10,6 +11,10 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (ref.watch(eventLoadingProvider)) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     final events = ref.watch(eventListProvider);
 
     if (events.isEmpty) {
@@ -17,14 +22,14 @@ class HomeScreen extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.pets, size: 72, color: Color(0xFFD8A47F)),
+            Icon(Icons.pets, size: 72, color: AppColors.sand),
             SizedBox(height: 16),
             Text(
               'No events yet.',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF272932),
+                color: AppColors.textPrimary,
               ),
             ),
             SizedBox(height: 6),

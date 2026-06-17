@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../../constants/app_colors.dart';
 import '../../constants/blueprint_colors.dart';
 import '../../database/database.dart';
 
@@ -129,7 +130,7 @@ class _EventBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final accentColor = event.systemComponents.isNotEmpty
         ? blueprintColor(event.systemComponents.first)
-        : const Color(0xFFD8A47F);
+        : AppColors.sand;
     return Container(
       height: _kEvtH,
       margin: const EdgeInsets.only(bottom: 2),
@@ -150,7 +151,7 @@ class _EventBlock extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 14,
-              backgroundColor: const Color(0xFFD8A47F),
+              backgroundColor: AppColors.sand,
               child: Text(event.petName[0].toUpperCase(),
                   style: const TextStyle(
                       color: Colors.white,

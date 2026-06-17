@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'constants/app_colors.dart';
 import 'constants/dummy_data.dart';
+import 'providers/database_provider.dart';
 import 'providers/nav_provider.dart';
 import 'providers/profile_provider.dart';
 import 'providers/theme_provider.dart';
@@ -15,13 +17,6 @@ import 'services/database_service.dart';
 import 'services/profile_service.dart';
 import 'services/theme_service.dart';
 
-const _teal = Color(0xFF0F7173);
-const _background = Color(0xFFE7ECEF);
-const _surface = Color(0xFFFFFFFF);
-const _navBar = Color(0xFF272932);
-const _coral = Color(0xFFF05D5E);
-const _sand = Color(0xFFD8A47F);
-const _ink = Color(0xFF272932);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,14 +56,14 @@ class PawlogApp extends ConsumerWidget {
       darkTheme: ThemeData.dark(),
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: _teal).copyWith(
-          primary: _teal,
-          surface: _surface,
-          onSurface: _ink,
+        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary).copyWith(
+          primary: AppColors.primary,
+          surface: AppColors.surface,
+          onSurface: AppColors.textPrimary,
         ),
-        scaffoldBackgroundColor: _background,
+        scaffoldBackgroundColor: AppColors.background,
         appBarTheme: const AppBarTheme(
-          backgroundColor: _teal,
+          backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           elevation: 0,
           titleTextStyle: TextStyle(
@@ -79,15 +74,15 @@ class PawlogApp extends ConsumerWidget {
           ),
         ),
         bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: _navBar,
-          selectedItemColor: _coral,
-          unselectedItemColor: _background.withValues(alpha: 0.55),
+          backgroundColor: AppColors.navBar,
+          selectedItemColor: AppColors.accent,
+          unselectedItemColor: AppColors.background.withValues(alpha: 0.55),
           type: BottomNavigationBarType.fixed,
           selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           unselectedLabelStyle: const TextStyle(fontSize: 12),
         ),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: _coral,
+          backgroundColor: AppColors.accent,
           foregroundColor: Colors.white,
           elevation: 4,
         ),
@@ -137,7 +132,7 @@ class MainScaffold extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.only(right: 16),
                   child: CircleAvatar(
-                    backgroundColor: _sand,
+                    backgroundColor: AppColors.sand,
                     child: Text(
                       avatarInitial,
                       style: const TextStyle(

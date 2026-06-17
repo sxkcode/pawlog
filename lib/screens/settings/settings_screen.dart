@@ -59,8 +59,13 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
     if (confirmed != true || !context.mounted) return;
-    await ref.read(petServiceProvider).clearAll();
-    await ref.read(eventServiceProvider).refresh();
+    try {
+      await ref.read(petServiceProvider).clearAll();
+      await ref.read(eventServiceProvider).refresh();
+    } catch (_) {
+      // Error already logged by the service; UI reflects whatever the DB
+      // actually contains after the failed operation.
+    }
   }
 
   @override

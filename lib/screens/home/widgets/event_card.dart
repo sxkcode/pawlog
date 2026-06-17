@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../constants/app_colors.dart';
 import '../../../database/database.dart';
-
-const _sand = Color(0xFFD8A47F);
-const _ink = Color(0xFF272932);
 
 class EventCard extends StatelessWidget {
   final EventWithPet event;
@@ -19,7 +17,7 @@ class EventCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE0E0E0)),
+          border: Border.all(color: AppColors.divider),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
@@ -27,7 +25,7 @@ class EventCard extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 22,
-              backgroundColor: _sand,
+              backgroundColor: AppColors.sand,
               child: Text(
                 petName.isNotEmpty ? petName[0].toUpperCase() : '?',
                 style: const TextStyle(
@@ -47,7 +45,7 @@ class EventCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: _ink,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 3),
