@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'constants/dummy_data.dart';
 import 'providers/nav_provider.dart';
+import 'providers/profile_provider.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/home/widgets/event_fab.dart';
 import 'screens/pets/pet_detail_screen.dart';
 import 'screens/pets/pets_screen.dart';
 import 'screens/calendar/calendar_screen.dart';
+import 'screens/profile/profile_screen.dart';
 import 'screens/settings/settings_screen.dart';
 import 'services/database_service.dart';
+import 'services/profile_service.dart';
 
 const _teal = Color(0xFF0F7173);
 const _background = Color(0xFFE7ECEF);
@@ -22,6 +25,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final dbService = DatabaseService.create();
+  final profileService = await ProfileService.create();
 
   // Seed with demo data on first launch (empty DB).
   final existingPets = await dbService.db.getPetsForUser();
@@ -31,7 +35,10 @@ void main() async {
 
   runApp(
     ProviderScope(
-      overrides: [databaseServiceProvider.overrideWithValue(dbService)],
+      overrides: [
+        databaseServiceProvider.overrideWithValue(dbService),
+        profileServiceProvider.overrideWith((ref) => profileService),
+      ],
       child: const PawlogApp(),
     ),
   );
@@ -96,22 +103,41 @@ class MainScaffold extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedIndex = ref.watch(navIndexProvider);
+    final displayName = ref.watch(profileServiceProvider).displayName;
+    final avatarInitial = displayName.trim().isNotEmpty
+        ? displayName.trim()[0].toUpperCase()
+        : 'M';
 
     return Scaffold(
       appBar: switch (selectedIndex) {
         0 => AppBar(
             title: const Text('Pawlog'),
             actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: CircleAvatar(
-                  backgroundColor: _sand,
-                  child: const Text(
-                    'SK',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
+              PopupMenuButton<String>(
+                offset: const Offset(0, 48),
+                onSelected: (value) {
+                  if (value == 'profile') {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const ProfileScreen()));
+                  } else if (value == 'settings') {
+                    ref.read(navIndexProvider.notifier).state = 3;
+                  }
+                },
+                itemBuilder: (_) => const [
+                  PopupMenuItem(value: 'profile', child: Text('Edit Profile')),
+                  //PopupMenuItem(value: 'settings', child: Text('Settings')),
+                ],
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: CircleAvatar(
+                    backgroundColor: _sand,
+                    child: Text(
+                      avatarInitial,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ),

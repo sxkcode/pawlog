@@ -26,6 +26,7 @@ class EventService extends ChangeNotifier {
   Future<void> logEvents({
     required List<String> systemComponentKeys,
     required List<int> petIds,
+    String loggedByName = 'Me',
   }) async {
     final sorted = SystemBlueprint.values
         .where((b) => systemComponentKeys.contains(b.name))
@@ -39,7 +40,7 @@ class EventService extends ChangeNotifier {
         systemComponents: Value(sorted),
         customBlueprintIds: const Value([]),
         timestamp: Value(now),
-        loggedByName: const Value('Me'),
+        loggedByName: Value(loggedByName),
         displayLabel: Value(label),
       ));
     }

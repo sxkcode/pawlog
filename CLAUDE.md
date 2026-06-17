@@ -1,20 +1,34 @@
-# PetTracker
+# Pawlog
 
-A Flutter app for logging and tracking pet care events (feeding, walks, bathroom, medication, etc.) across multiple users and pets.
+A Flutter app for logging and tracking pet care events across multiple users and pets.
 
 ## Stack
 - **Frontend:** Flutter (iOS, Android, web)
-- **Local DB:** ObjectBox
-- **Auth/Sync (future):** Firebase Auth + Firestore — not yet implemented
+- **Local DB:** Drift (drift_flutter) — SQLite on mobile/desktop, WASM on web
+- **State:** Riverpod (flutter_riverpod)
+- **Auth/Sync:** Firebase Auth + Firestore — not yet implemented
+
+## Platform Targets
+iOS, Android, web (Chrome). Never use ObjectBox — removed due to no web support.
 
 ## Project Structure
 ```
 lib/
-  models/          # ObjectBox entities
+  database/
+    database.dart         # Drift AppDatabase, table definitions
+    drift_converters.dart # List<String>/List<int> ↔ JSON, DateTime ↔ int
   services/
-    objectbox.dart # Box init, singleton
-    event_service.dart
-    pet_service.dart
+    database_service.dart # Drift singleton
+    event_service.dart    # ChangeNotifier
+    pet_service.dart      # ChangeNotifier
+    profile_service.dart  # ChangeNotifier, display name via shared_preferences
+    theme_service.dart    # ChangeNotifier, ThemeMode via shared_preferences
+  providers/
+    event_provider.dart
+    pet_provider.dart
+    profile_provider.dart
+    theme_provider.dart
+    nav_provider.dart
   screens/
     home/
       home_screen.dart
@@ -23,70 +37,86 @@ lib/
         event_fab.dart
         date_section_header.dart
     pets/
+      pets_screen.dart
+      pet_detail_screen.dart
     calendar/
+      calendar_screen.dart
+      day_timeline_screen.dart
     settings/
+      settings_screen.dart
+    profile/
+      profile_screen.dart
   constants/
-    system_blueprints.dart
+    system_blueprints.dart # SystemBlueprint enum, buildDisplayLabel()
+    blueprint_colors.dart  # Per-activity colors
   main.dart
 ```
 
-## Key Conventions
-- All new screens go under `lib/screens/`
-- Widgets specific to a screen live in `screens/<screen>/widgets/`
-- ObjectBox singleton initialized once in `main.dart`, passed via service
-- `displayLabel` on Event is always generated at write time, never at render time
-- System blueprint keys are always lowercase snake_case strings matching `SystemBlueprint` enum
-- Components on composite blueprints are always sorted in canonical enum order before persisting
-
-## Architecture
-State management: [pick one — see below]
-- All business logic lives in service classes under lib/services/
-- Screens and widgets contain zero business logic — they call services 
-  and render state only
-- No business logic in constructors or initState()
-
-## State Management
-Use Riverpod (the `flutter_riverpod` package, with riverpod_annotation 
-for code generation).
-
+## Architecture Rules
+- Business logic and DB access live in `lib/services/` only — never in widgets or build()
+- Widgets extend ConsumerWidget or ConsumerStatefulWidget
+- Use ref.watch() in build(), ref.read() in callbacks
+- setState() only for local widget UI state (e.g. FAB step index)
+- Services are ChangeNotifier classes exposed via ChangeNotifierProvider
 - All providers defined in lib/providers/
-- Business logic and ObjectBox access in AsyncNotifier or Notifier 
-  classes under lib/services/
-- Widgets extend ConsumerWidget (stateless) or ConsumerStatefulWidget 
-  (stateful) — never plain StatelessWidget/StatefulWidget unless the 
-  widget has zero state dependencies
-- Use ref.watch() to subscribe to state in build()
-- Use ref.read() to call methods in callbacks (onPressed etc.)
-- setState() only for purely local widget UI state (e.g. current step 
-  in the FAB bottom sheet)
-- Never access ObjectBox directly from a widget or build() method
+- One widget per file, max 200 lines per file — refactor before adding more
 
-## File size rules
-- If a file exceeds 200 lines, refactor before adding more code
-- One widget per file
-- No widget file should contain more than one StatefulWidget
+## Conventions
+- New screens → `lib/screens/`, screen-specific widgets → `screens/<screen>/widgets/`
+- displayLabel generated at write time only, never at render time
+- SystemBlueprint keys are lowercase snake_case matching the enum in system_blueprints.dart
+- Blueprint components always sorted in canonical enum order before persisting
+- List<String> and List<int> stored as JSON via Drift type converters
+- DateTime stored as epoch milliseconds via Drift type converter
 
 ## Do Not
-- Do not add Firebase or any network calls yet — local only for now
-- Do not use `BuildContext` across async gaps without mounted checks
-- Do not store computed/derived values in ObjectBox except `displayLabel`
-- Do not use setState() for anything shared across screens
-- Do not put database calls directly in widget build() methods
-- Do not duplicate logic — if something is needed in two places, 
-  it goes in a service
+- No Firebase or network calls yet — local only
+- No BuildContext across async gaps without mounted checks
+- No duplicate logic — shared logic goes in a service
+- No direct Drift/DB access in widgets
+
+## Web Dependencies
+When upgrading packages, versions must stay in sync:
+- sqlite3.wasm (in web/) must match the sqlite3 version in pubspec.lock
+- drift_worker.js (in web/) must match the drift version in pubspec.lock
+
+## Color Palette
+| Role | Color |
+|---|---|
+| Primary / top bar | #0F7173 |
+| Background | #E7ECEF |
+| Surface / cards | #FFFFFF |
+| Bottom nav | #272932 |
+| FAB / primary action | #F05D5E |
+| Pet avatars / accent | #D8A47F |
+| Text primary | #272932 |
+
+## Activity Colors (lib/constants/blueprint_colors.dart)
+| Activity | Color |
+|---|---|
+| Poop | #8B6914 |
+| Pee | #F5C842 |
+| Walk | #0F7173 |
+| Medication | #9B59B6 |
+| Play | #F05D5E |
+| Training | #2ECC71 |
+
+## Deferred Features
+- Pet and profile photos
+- Dark mode palette (ThemeMode toggle exists but uses ThemeData.dark() placeholder)
+- Push notifications / FCM
+- Firebase Auth + Firestore sync (Phase 2)
+- Multi-user invite flow (Phase 2)
+- Role display on Pets screen + conditional edit/delete controls (Phase 2)
+- Account/credential management (Phase 2)
+
+## Phase 2 Notes
+Role system: three tiers per pet — Parent, Relative, Sitter.
+See @docs/features.md for permission table.
+At least one Parent must exist per pet (enforced in app logic).
+When Phase 2 begins, role chip should appear on each Pets list item,
+and PetDetailScreen edit/delete should gate on role.
 
 ## Reference Docs
-See @docs/data-model.md for full entity definitions and relationships.
-See @docs/features.md for full feature specs and UX flows.
-
-## Dependencies
-- A new sqlite3.wasm must be downloaded if sqlite3 is updated in pubspec.yaml and the .wasm must match the version in the pubspec.lock
-- A new drift_worker.js must be downloaded if drift is updated in pubspec.yaml and the .js must match the version in the pubspec.lock
-
-## Deferred: Role display on Pets screen
-Each pet list item should eventually show the user's role 
-(Parent / Relative / Sitter) as a small chip. Deferred until 
-Firebase Auth and the membership/invite system is implemented. 
-When added, edit and delete controls on PetDetailScreen should 
-be conditionally shown based on role — Parents only for delete, 
-Parents and Relatives for edit.
+See @docs/data-model.md for entity definitions.
+See @docs/features.md for feature specs and UX flows.

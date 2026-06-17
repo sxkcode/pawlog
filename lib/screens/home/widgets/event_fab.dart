@@ -4,6 +4,7 @@ import '../../../constants/system_blueprints.dart';
 import '../../../database/database.dart';
 import '../../../providers/event_provider.dart';
 import '../../../providers/pet_provider.dart';
+import '../../../providers/profile_provider.dart';
 
 const _coral = Color(0xFFF05D5E);
 const _sand = Color(0xFFD8A47F);
@@ -20,27 +21,34 @@ class _EventFabState extends ConsumerState<EventFab> {
   int _step = 1;
   final _selectedKeys = <String>[];
   final _selectedPetIds = <int>[];
-  List<Pet>? _pets;
+  List<Pet> _pets = const [];
   bool _saving = false;
+
+  ButtonStyle get _actionStyle => ElevatedButton.styleFrom(
+        backgroundColor: _coral, foregroundColor: Colors.white,
+        disabledBackgroundColor: Colors.grey.shade300, disabledForegroundColor: Colors.grey.shade500,
+      );
 
   Future<void> _openSheet() async {
     _step = 1;
+    _saving = false;
     _selectedKeys.clear();
     _selectedPetIds.clear();
     _pets = ref.read(petListProvider);
-    _saving = false;
     setState(() => _sheetOpen = true);
     if (!mounted) return;
     await showModalBottomSheet<void>(
       context: context,
-      isDismissible: false,
-      enableDrag: false,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, ss) => _buildSheet(ctx, ss),
+        builder: (ctx, ss) => Padding(
+          padding: EdgeInsets.fromLTRB(
+              16, 20, 16, MediaQuery.of(ctx).viewInsets.bottom + 16),
+          child: _step == 1 ? _buildStep1(ctx, ss) : _buildStep2(ctx, ss),
+        ),
       ),
     );
     if (mounted) setState(() => _sheetOpen = false);
@@ -51,38 +59,30 @@ class _EventFabState extends ConsumerState<EventFab> {
     await ref.read(eventServiceProvider).logEvents(
       systemComponentKeys: List.of(_selectedKeys),
       petIds: List.of(_selectedPetIds),
+      loggedByName: ref.read(profileServiceProvider).displayName,
     );
     if (ctx.mounted) Navigator.of(ctx).pop();
   }
 
-  Widget _buildSheet(BuildContext ctx, StateSetter ss) {
-    return PopScope(
-      canPop: false,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          16, 20, 16, MediaQuery.of(ctx).viewInsets.bottom + 16,
-        ),
-        child: _step == 1 ? _buildStep1(ctx, ss) : _buildStep2(ctx, ss),
-      ),
-    );
-  }
+  Widget _header(String title, BuildContext ctx) => Row(
+        children: [
+          Expanded(child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+          IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(ctx).pop(), padding: EdgeInsets.zero, constraints: const BoxConstraints()),
+        ],
+      );
 
   Widget _buildStep1(BuildContext ctx, StateSetter ss) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text('What happened?',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        _header('What happened?', ctx),
         const SizedBox(height: 4),
         for (final b in SystemBlueprint.values)
           CheckboxListTile(
             title: Text(_labelFor(b)),
             value: _selectedKeys.contains(b.name),
-            onChanged: (v) => ss(() {
-              if (v == true) { _selectedKeys.add(b.name); }
-              else { _selectedKeys.remove(b.name); }
-            }),
+            onChanged: (v) => ss(() => v == true ? _selectedKeys.add(b.name) : _selectedKeys.remove(b.name)),
             activeColor: _coral,
             controlAffinity: ListTileControlAffinity.leading,
             contentPadding: EdgeInsets.zero,
@@ -90,12 +90,7 @@ class _EventFabState extends ConsumerState<EventFab> {
         const SizedBox(height: 12),
         ElevatedButton(
           onPressed: _selectedKeys.isEmpty ? null : () => ss(() => _step = 2),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _coral,
-            foregroundColor: Colors.white,
-            disabledBackgroundColor: Colors.grey.shade300,
-            disabledForegroundColor: Colors.grey.shade500,
-          ),
+          style: _actionStyle,
           child: const Text('NEXT →'),
         ),
       ],
@@ -104,20 +99,14 @@ class _EventFabState extends ConsumerState<EventFab> {
 
   Widget _buildStep2(BuildContext ctx, StateSetter ss) {
     final pets = _pets;
-    final canDone = pets != null && pets.isNotEmpty && _selectedPetIds.isNotEmpty && !_saving;
+    final canDone = pets.isNotEmpty && _selectedPetIds.isNotEmpty && !_saving;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text('Which pets?',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        _header('Which pets?', ctx),
         const SizedBox(height: 4),
-        if (pets == null)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
-            child: Center(child: CircularProgressIndicator()),
-          )
-        else if (pets.isEmpty)
+        if (pets.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 24),
             child: Text(
@@ -140,8 +129,11 @@ class _EventFabState extends ConsumerState<EventFab> {
               onChanged: _saving
                   ? null
                   : (v) => ss(() {
-                        if (v == true) { _selectedPetIds.add(p.id); }
-                        else { _selectedPetIds.remove(p.id); }
+                        if (v == true) {
+                          _selectedPetIds.add(p.id);
+                        } else {
+                          _selectedPetIds.remove(p.id);
+                        }
                       }),
               activeColor: _coral,
               controlAffinity: ListTileControlAffinity.leading,
@@ -156,17 +148,12 @@ class _EventFabState extends ConsumerState<EventFab> {
                 child: const Text('← BACK'),
               ),
             ),
-            if (pets != null && pets.isNotEmpty) ...[
+            if (pets.isNotEmpty) ...[
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: canDone ? () { _handleDone(ctx, ss); } : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _coral,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: Colors.grey.shade300,
-                    disabledForegroundColor: Colors.grey.shade500,
-                  ),
+                  onPressed: canDone ? () => _handleDone(ctx, ss) : null,
+                  style: _actionStyle,
                   child: _saving
                       ? const SizedBox(
                           height: 18,
