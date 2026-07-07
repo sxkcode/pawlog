@@ -1,4 +1,4 @@
-package com.example.dijupoo_front
+package com.sxkcode.pawlog
 
 import io.flutter.embedding.android.FlutterActivity
 
